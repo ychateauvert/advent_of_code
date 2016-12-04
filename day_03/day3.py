@@ -2,10 +2,6 @@
 
 from pprint import pprint
 
-# in_value = [sorted(list(map(int, t.split()))) for t in open("input.txt").read().split("\n")]
-
-# valid_triangle = list(filter(lambda x: len(x) == 3 and x[1] + x[2] > x[0], in_value))
-
 def valid_triangle(sides):
     if len(sides) < 3:
         return False
