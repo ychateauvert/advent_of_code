@@ -39,9 +39,6 @@ class Panel:
         if animate:
             self.print()
         for i in instructions:
-            print()
-            print(i)
-
             if re.match('rect', i):
                 width, height = re.search(r"rect (\d+)x(\d+)", i).group(1, 2)
                 self.rect(int(width), int(height))
