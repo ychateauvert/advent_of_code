@@ -1,18 +1,14 @@
 #!/usr/bin/env python
 
 import sys
-from itertools.chain import from_iterable
+import itertools
 import pdb
 
-blacklist_rules = [range(int(i[0]), int(i[1]) + 1) for i in [x.split("-") for x in open("input.txt").read().strip().split("\n")]]
+blacklist_rules = itertools.chain.from_iterable([range(int(i[0]), int(i[1]) + 1) for i in [x.split("-") for x in open("input.txt").read().strip().split("\n")]])
 
 
 def is_blacklisted(value):
-    for rule in blacklist_rules:
-        if value in rule:
-            return True
-
-    return False
+    return value not in blacklist_rules
 
 
 def non_blacklisted(all_values):
@@ -22,7 +18,8 @@ def non_blacklisted(all_values):
     {3, 9}
     """
     for i in all_values:
-        if not is_blacklisted(i):
+        if i not in blacklist_rules:
+            print('Found %s' % i)
             yield(i)
 
 
@@ -31,7 +28,6 @@ def main():
 
     values = range(0, 4294967295)
 
-    blacklist_rules = [range(int(i[0]), int(i[1]) + 1) for i in [x.split("-") for x in open("input.txt").read().strip().split("\n")]]
     # for valid in non_blacklisted(values):
         # print('[Part 1] Found %s' % valid)
         # sys.exit(0)
