@@ -89,6 +89,9 @@ def rotate_direction(direction, steps):
 
     >>> rotate_direction(-1, 6)('decab', True)
     'ecabd'
+
+    >>> rotate_direction(-1, 2)('eabcd', True)
+    'bcdea'
     """
     def perform(value, reverse=False):
         multiplier = direction
@@ -112,13 +115,26 @@ def rotate_position(letter):
 
     >>> rotate_position('d')('decab', True)
     'ecabd'
+
+    >>> rotate_position('b')('ecabd', True)
+    'abdec'
     """
     def perform(value, reverse=False):
-        first_occ = value.find(letter)
-        if first_occ >= 4:
-            first_occ += 1
+        if not reverse:
+            first_occ = value.find(letter)
+            if first_occ >= 4:
+                first_occ += 1
 
-        return rotate_direction(-1, first_occ + 1)(value, reverse)
+            return rotate_direction(-1, first_occ + 1)(value)
+        else:
+            unscrambled = value
+            rotate_left = rotate_direction(1, 1)
+            rotator = rotate_position(letter)
+            while True:
+                unscrambled = rotate_left(unscrambled)
+
+                if rotator(unscrambled) == value:
+                    return unscrambled
 
     return perform
 
