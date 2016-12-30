@@ -2,7 +2,7 @@
 
 import unittest
 
-from day_23 import AssembunnyInterpreter
+from day_23 import BunnyAssembler
 
 class TestDay23(unittest.TestCase):
 
@@ -17,8 +17,9 @@ class TestDay23(unittest.TestCase):
             "dec a",
         ]
 
-        interpreter = AssembunnyInterpreter.load_from_instructions(provided)
-        self.assertEqual(3, interpreter.interpret()["a"])
+        interpreter = BunnyAssembler.load_from_instructions(provided)
+        registers = interpreter.interpret()
+        self.assertEqual(3, registers['a'])
 
 if __name__ == '__main__':
     unittest.main()
