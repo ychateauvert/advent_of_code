@@ -1,9 +1,15 @@
 #!/usr/bin/env python
 
+import sys
+
 from collections import defaultdict
+
 
 class BunnyAssembler:
     def __init__(self, instructions):
+        self.registers = dict()
+        self.toggled = dict()
+        self.current_instruction = 0
         self.instructions = instructions
 
     def read(self, register):
@@ -17,7 +23,6 @@ class BunnyAssembler:
             registers = defaultdict(int)
 
         self.registers = registers
-        self.toggled = dict()
 
         self.current_instruction = 0
         try:
@@ -25,10 +30,8 @@ class BunnyAssembler:
                 instruction, *args = self.instructions[self.current_instruction]
 
                 if self.current_instruction in self.toggled:
-                    # print("Toggled %s, %s" % (instruction, args))
                     self.current_instruction += self.inversed(instruction, args)
                 else:
-                    # print("Regular %s, %s" % (instruction, args))
                     self.current_instruction += self.regular(instruction, args)
 
                 # print(self.registers)
@@ -68,24 +71,35 @@ class BunnyAssembler:
         elif instruction == 'tgl':
             offset = self.registers[args[0]]
             self.toggled[offset + self.current_instruction] = True
+        elif instruction == 'out':
+            register = args[0]
+            print(self.read(register))
 
         return 1
 
+    @staticmethod
     def load_script(filename):
         return BunnyAssembler.load_from_instructions(open(filename).read().strip().split("\n"))
 
+    @staticmethod
     def load_from_instructions(instructions):
         instructions = [x.split(" ") for x in instructions]
         return BunnyAssembler(instructions)
 
 
 def main():
-    interpreter = BunnyAssembler.load_script('inputs/day_23.txt')
-    registers = interpreter.interpret({"a": 7})
-    print("[Part 1] Value in 'a' register: %s" % registers['a'])
+    if not sys.stdin.isatty():
+        input_stream = sys.stdin.read().strip().split("\n")
+        interpreter = BunnyAssembler.load_from_instructions(input_stream)
+        interpreter.interpret()
+    else:
+        interpreter = BunnyAssembler.load_script('inputs/day_23.txt')
+        registers = interpreter.interpret({"a": 7})
 
-    registers = interpreter.interpret({"a": 12})
-    print("[Part 2] Value in 'a' register: %s" % registers['a'])
+        print("[Part 1] Value in 'a' register: %s" % registers['a'])
+
+        registers = interpreter.interpret({"a": 12})
+        print("[Part 2] Value in 'a' register: %s" % registers['a'])
 
 if __name__ == '__main__':
     main()
