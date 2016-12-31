@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys
+import pdb
 
 from collections import defaultdict
 
@@ -11,6 +12,8 @@ class BunnyAssembler:
         self.toggled = dict()
         self.current_instruction = 0
         self.instructions = instructions
+
+        self.max_prints = -1
 
     def read(self, register):
         try:
@@ -33,8 +36,6 @@ class BunnyAssembler:
                     self.current_instruction += self.inversed(instruction, args)
                 else:
                     self.current_instruction += self.regular(instruction, args)
-
-                # print(self.registers)
         except IndexError:
             pass
 
@@ -74,6 +75,10 @@ class BunnyAssembler:
         elif instruction == 'out':
             register = args[0]
             print(self.read(register))
+            if self.max_prints != -1:
+                self.max_prints -= 1
+                if self.max_prints == 0:
+                    sys.exit(0)
 
         return 1
 
@@ -91,6 +96,8 @@ def main():
     if not sys.stdin.isatty():
         input_stream = sys.stdin.read().strip().split("\n")
         interpreter = BunnyAssembler.load_from_instructions(input_stream)
+        if len(sys.argv) == 2:
+            interpreter.max_prints = int(sys.argv[1])
         interpreter.interpret()
     else:
         interpreter = BunnyAssembler.load_script('inputs/day_23.txt')
