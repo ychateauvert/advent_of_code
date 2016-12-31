@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from hashlib import md5
-from collections import namedtuple
+
 
 class Tile:
     def __init__(self, x, y):
@@ -21,10 +21,13 @@ class Tile:
         return Tile(self.x + 1, self.y)
 
     def is_valid(self):
-        if self.x >= 0 and self.x <= 3 and self.y >= 0 and self.y <= 3:
+        if 0 <= self.x <= 3 and 0 <= self.y <= 3:
             return True
 
         return False
+
+    def __eq__(self, other):
+        return self.x == other.x and self.y == other.y
 
     def __repr__(self):
         return "Tile(%s, %s)" % (self.x, self.y)
@@ -60,6 +63,9 @@ class Node:
 
         return v
 
+    def distance(self):
+        return len(self.visited)
+
     def __repr__(self):
         return "Node: (%s, %s) %s%s" % (self.position.x, self.position.y, self.passcode, self.visited)
 
@@ -79,25 +85,31 @@ def shortest_path(passcode):
     >>> shortest_path('ulqzkmiv')
     'DRURDRUDDLLDLUURRDULRLDUUDDDRR'
     """
+    longest_distance = None
+    shortest_distance = None
     start = Node(Tile(0, 0), passcode, '')
     nodes = start.adjacents()
     while len(nodes) > 0:
         node = nodes.pop(0)
 
         if node.position == WIN_POSITION:
-            print('')
-            print('Found:')
-            print(node)
-            print(node.visited)
+            if not shortest_distance:
+                shortest_distance = node
 
-            return node
+            if not longest_distance or len(longest_distance.visited) < len(node.visited):
+                longest_distance = node
+
         else:
             nodes += node.adjacents()
 
+    return shortest_distance.visited, longest_distance.visited
+
 
 def main():
-    room = Room((0,0), 'hijkl')
-    adjacents = room.adjacent_rooms()
+    shortest, longest = shortest_path('njfxhljp')
+
+    print('[Part 1] %s' % shortest)
+    print('[Part 2] %s' % len(longest))
 
 
 if __name__ == '__main__':
