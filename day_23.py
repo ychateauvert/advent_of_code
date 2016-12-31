@@ -17,29 +17,59 @@ class BunnyAssembler:
             registers = defaultdict(int)
 
         self.registers = registers
+        self.toggled = dict()
 
-        current_instruction = 0
+        self.current_instruction = 0
         try:
             while True:
-                instruction, *args = self.instructions[current_instruction]
-                if instruction == 'cpy':
-                    value, register = args
-                    self.registers[register] = self.read(value)
-                elif instruction == 'inc':
-                    self.registers[args[0]] += 1
-                elif instruction == 'dec':
-                    self.registers[args[0]] -= 1
-                elif instruction == 'jnz':
-                    register, offset = args
-                    if self.read(register) != 0:
-                        current_instruction += int(offset)
-                        continue
+                instruction, *args = self.instructions[self.current_instruction]
 
-                current_instruction += 1
+                if self.current_instruction in self.toggled:
+                    # print("Toggled %s, %s" % (instruction, args))
+                    self.current_instruction += self.inversed(instruction, args)
+                else:
+                    # print("Regular %s, %s" % (instruction, args))
+                    self.current_instruction += self.regular(instruction, args)
+
+                # print(self.registers)
         except IndexError:
             pass
 
         return self.registers
+
+    def inversed(self, instruction, args):
+        if len(args) == 1:
+            if instruction == 'inc':
+                self.registers[args[0]] -= 1
+            else:
+                self.registers[args[0]] += 1
+        elif len(args) == 2:
+            if instruction == 'jnz':
+                value, register = args
+                self.registers[register] = self.read(value)
+            else:
+                register, offset = args
+                if self.read(register) != 0:
+                    return self.read(offset)
+        return 1
+
+    def regular(self, instruction, args):
+        if instruction == 'cpy':
+            value, register = args
+            self.registers[register] = self.read(value)
+        elif instruction == 'inc':
+            self.registers[args[0]] += 1
+        elif instruction == 'dec':
+            self.registers[args[0]] -= 1
+        elif instruction == 'jnz':
+            register, offset = args
+            if self.read(register) != 0:
+                return self.read(offset)
+        elif instruction == 'tgl':
+            offset = self.registers[args[0]]
+            self.toggled[offset + self.current_instruction] = True
+
+        return 1
 
     def load_script(filename):
         return BunnyAssembler.load_from_instructions(open(filename).read().strip().split("\n"))
@@ -50,13 +80,12 @@ class BunnyAssembler:
 
 
 def main():
-    interpreter = BunnyAssembler.load_script('inputs/day_12.txt')
-    registers = interpreter.interpret()
+    interpreter = BunnyAssembler.load_script('inputs/day_23.txt')
+    registers = interpreter.interpret({"a": 7})
     print("[Part 1] Value in 'a' register: %s" % registers['a'])
 
-    registers = interpreter.interpret({"c": 1})
-    print("[Part 2] Value in 'a' when register 'c' is initialized: %s" % registers['a'])
-
+    registers = interpreter.interpret({"a": 12})
+    print("[Part 2] Value in 'a' register: %s" % registers['a'])
 
 if __name__ == '__main__':
     main()
