@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 # Demo puzzle
-# base_hash_input  = 'flqrgnkx'
+base_hash_input  = 'flqrgnkx'
 # Real puzzle
-base_hash_input = 'hwlqcszp'
+# base_hash_input = 'hwlqcszp'
 
 
 def reverse_sub(lst, start, end):
@@ -48,10 +48,58 @@ def hex_to_binary(h):
     return bin(int(h, 16))[2:]
 
 
-def used_spaces(hash):
-    return len(list(filter(lambda x: x == '1', hex_to_binary(hash))))
+def used_spaces(row):
+    return len(list(filter(lambda x: x == '1', hex_to_binary(row))))
 
 
-rows = [used_spaces(knot_hash("{}-{}".format(base_hash_input, i))) for i in range(128)]
+def number_of_regions(grid):
+    coordinates = []
+    for y, row in enumerate(grid):
+        for x, value in enumerate(hex_to_binary(row)):
+            if value == '1':
+                coordinates.append((x, y))
 
-print(sum(rows))
+    regions = find_regions(grid, coordinates)
+
+    return len(regions)
+
+
+def neighbor(coordinate):
+    x, y = coordinate
+
+    coords = [(x-1, y), (x+1, y), (x, y-1), (x, y+1)]
+    return [(x, y) for x, y in coords if 0 <= x < 128 and 0 <= y < 128]
+
+
+def find_siblings(coordinates, block):
+    seen = set()
+    to_checks = list()
+    to_checks.append(block)
+    while len(to_checks) > 0:
+        checked = to_checks.pop()
+        for n in neighbor(checked):
+            if n in coordinates and n not in seen:
+                to_checks.append(n)
+
+        seen.add(checked)
+
+    return seen
+
+
+def find_regions(grid, coordinates):
+    regions = []
+    coordinates = coordinates[:]
+    while len(coordinates) > 0:
+        coord = coordinates.pop()
+        region = find_siblings(coordinates, coord)
+        regions.append(region)
+        for c in region:
+            if c in coordinates:
+                coordinates.remove(c)
+    return regions
+
+
+rows = [knot_hash("{}-{}".format(base_hash_input, i)) for i in range(128)]
+
+print("Part 1: {}".format(sum([used_spaces(i) for i in rows])))
+print("Part 2: {}".format(number_of_regions(rows)))
