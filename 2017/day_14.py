@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 # Demo puzzle
-base_hash_input  = 'flqrgnkx'
+# base_hash_input  = 'flqrgnkx'
 # Real puzzle
-# base_hash_input = 'hwlqcszp'
+base_hash_input = 'hwlqcszp'
 
 
 def reverse_sub(lst, start, end):
@@ -45,7 +45,7 @@ def knot_hash(raw):
 
 
 def hex_to_binary(h):
-    return bin(int(h, 16))[2:]
+    return '{:0128b}'.format(int(h, 16))
 
 
 def used_spaces(row):
@@ -59,7 +59,7 @@ def number_of_regions(grid):
             if value == '1':
                 coordinates.append((x, y))
 
-    regions = find_regions(grid, coordinates)
+    regions = find_regions(coordinates)
 
     return len(regions)
 
@@ -86,7 +86,7 @@ def find_siblings(coordinates, block):
     return seen
 
 
-def find_regions(grid, coordinates):
+def find_regions(coordinates):
     regions = []
     coordinates = coordinates[:]
     while len(coordinates) > 0:
