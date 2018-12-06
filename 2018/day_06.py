@@ -91,16 +91,7 @@ def area_shortest_shared_distance(coordinates):
     >>> area_shortest_shared_distance([(1, 1), (1, 6), (8, 3), (3, 4), (5, 5), (8, 9)])
     17
     """
-    closest_locations = dict()
-    min_x, max_x, min_y, max_y = grid_limits(coordinates)
-    for y in range(min_y, max_y):
-        for x in range(min_x, max_x):
-            if (x, y) in coordinates:
-                closest_locations[(x, y)] = (x, y)
-            else:
-                closest_locations[x, y] = closest_coordinate((x, y), coordinates)
-
-    areas = Counter(closest_locations.values())
+    areas = areas_counter(coordinates)
 
     for location, count in areas.most_common():
         if is_finite(location, coordinates):
@@ -109,8 +100,55 @@ def area_shortest_shared_distance(coordinates):
     exit('Broken')
 
 
+def areas_counter(coordinates):
+    closest_locations = dict()
+    min_x, max_x, min_y, max_y = grid_limits(coordinates)
+    for y in range(min_y, max_y):
+        for x in range(min_x, max_x):
+            if (x, y) in coordinates:
+                closest_locations[(x, y)] = (x, y)
+            else:
+                closest_locations[x, y] = closest_coordinate((x, y), coordinates)
+    areas = Counter(closest_locations.values())
+    return areas
+
+
+def is_within_distance(max_distance, coordinates):
+    """
+
+    :param max_distance:
+    :param coordinates:
+    :return:
+    >>> is_within_distance(32, [(1, 1), (1, 6), (8, 3), (3, 4), (5, 5), (8, 9)])((4, 3))
+    True
+    """
+    return lambda location: sum(manhattan_distance(x, location) for x in coordinates) < max_distance
+
+
+def safest_region(coordinates, max_distance):
+    """
+
+    :param coordinates:
+    :return:
+    >>> safest_region([(1, 1), (1, 6), (8, 3), (3, 4), (5, 5), (8, 9)], 32)
+    16
+    """
+    within_radius = is_within_distance(max_distance, coordinates)
+    position = []
+    min_x, max_x, min_y, max_y = grid_limits(coordinates)
+    for y in range(min_y, max_y):
+        for x in range(min_x, max_x):
+            if within_radius((x, y)):
+                position.append((x, y))
+
+    return len(position)
+
+
 if __name__ == '__main__':
     coordinates = list(map(lambda x: tuple(map(int, x.split(', '))), open('inputs/day_06.txt').read().strip().splitlines()))
-    part1 = area_shortest_shared_distance(coordinates)
 
-    print('Day 06 part 1: %s' % part1)
+    # part1 = area_shortest_shared_distance(coordinates)
+    # print('Day 06 part 1: %s' % part1)
+
+    part2 = safest_region(coordinates, 10000)
+    print('Day 06 part 2: %s' % part2)
