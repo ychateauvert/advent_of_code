@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
-raw_puzzle = open('inputs/day_02.txt').read().strip()
-puzzle_input = [int(x) for x in raw_puzzle.split(',')]
+puzzle_input = [int(x) for x in open('inputs/day_02.txt').read().strip().split(',')]
 
 
 def s_to_m(memory_str):
@@ -26,30 +25,20 @@ def multiply(memory, address):
     return address + 4
 
 
-def abort(memory, address):
-    return False
-
-
-opcodes = {
+supported_opcodes = {
     1: add,
     2: multiply,
-    99: abort
+    99: lambda memory, address: False
 }
 
 
-def run_instruction(memory, position=0):
-    if memory[position] == 99:
-        return False
-    opcode, first_val, second_val, output = memory[position:position+4]
-    if opcode == 1:
-        memory[output] = memory[first_val] + memory[second_val]
-    elif opcode == 2:
-        memory[output] = memory[first_val] * memory[second_val]
+def run_instruction(memory, address=0):
+    f = supported_opcodes[memory[address]]
 
-    return True
+    return f(memory, address)
 
 
-def run_program(memory, position=0):
+def run_program(memory, address=0):
     """
     >>> current_execution(s_to_m('1,0,0,0,99'))[0]
     2
@@ -61,10 +50,13 @@ def run_program(memory, position=0):
     30
     """
     current_execution = memory.copy()
-    while run_instruction(current_execution, position):
-        position += 4
 
-    return current_execution
+    # Look out for out of bounds
+    while True:
+        address = run_instruction(current_execution, address)
+
+        if not address:
+            return current_execution
 
 
 def part1(memory):
@@ -85,8 +77,10 @@ def part2(memory):
 
 
 def main():
-    # Result: 2692315
+    # Part 1: 2692315
     print(f"Part 1: {part1(puzzle_input)}")
+
+    # Part 2: 9507
     print(f"Part 2: {part2(puzzle_input)}")
 
 
