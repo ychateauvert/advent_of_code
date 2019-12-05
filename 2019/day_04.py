@@ -29,11 +29,11 @@ def valid_password(password):
 
 def valid_password_2(password):
     """
-    >>> valid_password('112233')
+    >>> valid_password_2('112233')
     True
-    >>> valid_password('123444')
+    >>> valid_password_2('123444')
     False
-    >>> valid_password('111122')
+    >>> valid_password_2('111122')
     True
     """
     last = None
